@@ -1,21 +1,28 @@
 // server/app.js
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
+require('dotenv').config();
+
+const connectDB = require('./config/db');
 
 const app = express();
 
+// Connect to MongoDB
+connectDB();
+
 // Middleware for handling JSON and CORS
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+}));
 
-// Connect to MongoDB (adjust the connection string as needed)
-mongoose.connect('mongodb://localhost:27017/greenwatch', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
-.then(() => console.log("MongoDB Connected"))
-.catch(err => console.error(err));
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: 'Something went wrong!' });
+});
 
 // Import and use the issues route
 const issuesRoute = require('./routes/issues');
